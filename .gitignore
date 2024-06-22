@@ -1,0 +1,6 @@
+config/database.php
+config/function.txt
+.env
+docker-compose.yml
+install.sql
+.idea
