@@ -10,7 +10,7 @@ foreach (['Animes', 'Mangás'] as $category){
 
 ?>
 <div class="container-fluid my-2 navbar-navlink">
-    <nav class="px-3 navbar navbar-expand-lg bg-light">
+    <nav class="px-3 navbar navbar-expand-lg bg-black">
         <div class="container-fluid">
             <a aria-label="anchor" class="navbar-brand" href="javascript:void(0);">
                 <img src="https://animabook.net/img/logo.png" alt="" class="d-inline-block align-text-top">
