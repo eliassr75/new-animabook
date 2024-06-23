@@ -188,10 +188,6 @@
             </div>
         </div>
 
-            <script>
-                console.log(<?=json_encode($anime, true)?>)
-            </script>
-
         <?php } ?>
 
         <div class="mb-5">
