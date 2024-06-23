@@ -16,6 +16,7 @@ class User extends BaseModel {
         'password',
         'gender',
         'token',
+        'avatar',
         'created',
         'updated'
     ];
@@ -27,6 +28,7 @@ class User extends BaseModel {
     public $password;
     public $gender;
     public $token;
+    public $avatar;
     public $created;
     public $updated;
 

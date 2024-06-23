@@ -3,6 +3,7 @@
 namespace App\Validators;
 
 use App\Models\User;
+use App\Models\Anime;
 use Exception;
 
 class Validator {
@@ -21,6 +22,12 @@ class Validator {
         }
         if (empty($user->username)) {
             throw new Exception("O username é obrigatório.");
+        }
+    }
+
+    public static function validateAnime(Anime $anime) {
+        if (empty($anime->name_default)) {
+            throw new Exception("O nome padrão não pode ser nulo.");
         }
     }
 }

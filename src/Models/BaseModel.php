@@ -76,13 +76,13 @@ abstract class BaseModel {
         $stmt = $pdo->query($sql);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $models = [];
-        foreach ($results as $result) {
-            $model = new static($pdo);
-            $model->mapData($result);
-            $models[] = $model;
-        }
-        return $models;
+//        $models = [];
+//        foreach ($results as $result) {
+//            $model = new static($pdo);
+//            $model->mapData($result);
+//            $models[] = $model;
+//        }
+        return $results;
     }
 
     public static function find($pdo, $id) {

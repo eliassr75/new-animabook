@@ -31,4 +31,11 @@ class UserController extends BaseController
             echo json_encode(['message' => 'Dados incompletos']);
         }
     }
+
+    public function showAllUsers()
+    {
+        define('TITLE_PAGE', 'Users');
+        $users = User::all($this->pdo);
+        $this->render('users', ['users' => $users, 'total' => count($users)]);
+    }
 }

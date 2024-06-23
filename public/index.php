@@ -1,28 +1,97 @@
 <?php
 
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] === "GET"){
+    header("Content-type: text/html; charset=utf-8");
+}else{
+    header("Content-type: application/json; charset=utf-8");
+}
+
+
 require_once '../vendor/autoload.php';
 require_once '../config/database.php';
 
+use App\Router;
+use App\Controllers\MenuController;
+use App\Controllers\AnimeController;
 use App\Controllers\UserController;
 
-$config = require '../config/database.php';
 
-try {
+$router = new Router();
 
-    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Rotas API - GET
+$router->addRoute('GET', '/api/users/', UserController::class, 'getAllUsers');
 
-    if ($uri === '/home/users' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        $controller = new UserController();
-        $controller->getAllUsers();
-    } elseif ($uri === '/home/users' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $controller = new UserController();
-        $controller->createUser();
-    } else {
-        header("HTTP/1.1 404 Not Found");
-        echo json_encode(['message' => 'Endpoint não encontrado']);
-    }
+// Rotas API - POST
+$router->addRoute('POST', '/api/users/', UserController::class, 'createUser');
+$router->addRoute('POST', '/api/menu_items/', MenuController::class, 'createMenuItem');
 
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage();
-}
-?>
+// Rotas API - PUT
+$router->addRoute('PUT', '/api/menu_items/', MenuController::class, 'updateMenuItem');
+
+// Rotas API - DELETE
+$router->addRoute('DELETE', '/api/menu_items/', MenuController::class, 'removeMenuItem');
+
+// ROTAS USERS - GET
+$router->addRoute('GET', '/users/', UserController::class, 'showAllUsers');
+
+//ROTAS ANIMES - GET
+$router->addRoute('GET', '/animes/', AnimeController::class, 'showAllAnimes');
+
+
+$router->handleRequest();
+
+
+//switch ($_SERVER['REQUEST_METHOD']){
+//    case 'GET':
+//        switch ($url){
+//            case '/api/users':
+//                $controller = new UserController();
+//                $controller->getAllUsers();
+//                break;
+//            case '/users':
+//                $controller = new UserController();
+//                $controller->showAllUsers();
+//                break;
+//            default:
+//                http_response_code(404);
+//                echo json_encode(['message' => 'Endpoint não encontrado'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+//                break;
+//        }
+//        break;
+//    case 'POST':
+//        switch ($url){
+//            case '/api/users':
+//                $controller = new UserController();
+//                $controller->createUser();
+//                break;
+//            default:
+//                http_response_code(404);
+//                echo json_encode(['message' => 'Endpoint não encontrado'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+//                break;
+//        }
+//        break;
+//    /** @noinspection PhpDuplicateSwitchCaseBodyInspection */
+//    case 'PUT':
+//        switch ($url){
+//            default:
+//                http_response_code(404);
+//                echo json_encode(['message' => 'Endpoint não encontrado'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+//                break;
+//        }
+//        break;
+//    /** @noinspection PhpDuplicateSwitchCaseBodyInspection */
+//    case 'DELETE':
+//        switch ($url){
+//            default:
+//                http_response_code(404);
+//                echo json_encode(['message' => 'Endpoint não encontrado'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+//                break;
+//        }
+//        break;
+//    default:
+//        http_response_code(405);
+//        echo json_encode(["error" => "Método não permitido"], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+//        break;
+//}
