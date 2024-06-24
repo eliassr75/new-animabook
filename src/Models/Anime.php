@@ -49,6 +49,43 @@ class Anime extends BaseModel
         'demographics'
     ];
 
+    public $id;
+    public $mal_id;
+    public $images;
+    public $trailer;
+    public $approved;
+    public $title;
+    public $title_english;
+    public $title_japanese;
+    public $type;
+    public $source;
+    public $episodes;
+    public $status;
+    public $airing;
+    public $aired;
+    public $duration;
+    public $rating;
+    public $score;
+    public $scored_by;
+    public $rank;
+    public $popularity;
+    public $members;
+    public $favorites;
+    public $synopses;
+    public $background;
+    public $season;
+    public $year;
+    public $broadcast;
+    public $titles = [];
+    public $title_synonyms = [];
+    public $producers = [];
+    public $licensors = [];
+    public $studios = [];
+    public $genres = [];
+    public $explicit_genres = [];
+    public $themes = [];
+    public $demographics = [];
+
     public function validate() {
 
         if(empty($this->token)){

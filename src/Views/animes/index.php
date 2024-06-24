@@ -58,13 +58,13 @@
             <div class="card custom-card overflow-hidden">
                 <div class="row g-0">
                     <div class="col-md-12 position-relative">
-                        <img src="<?=$anime->images->jpg->large_image_url?>" class="img-cover img-fluid rounded-start h-100 w-100">
+                        <img src="<?=$anime->images->jpg->large_image_url?>" id="image<?=$anime->mal_id?>"
+                             class="img-cover img-fluid rounded-start w-100" style="height: 40vh; object-fit: cover;">
                         <div class="offcanvas offcanvas-start position-absolute w-100 h-100" data-bs-scroll="true"
                              data-bs-backdrop="false" tabindex="-1" id="offcanvas<?=$anime->mal_id?>"
                              aria-labelledby="offcanvas<?=$anime->mal_id?>Label">
                             <div class="offcanvas-header border-bottom border-block-end-dashed">
-                                <button type="button" class="ms-auto btn-close" data-bs-dismiss="offcanvas"
-                                        aria-label="Close"></button>
+                                <button type="button" class="ms-auto btn-close"></button>
                             </div>
                             <div class="offcanvas-body">
 
@@ -212,4 +212,32 @@
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
 <?php require_once __DIR__ . '/../htmlEnd.php';?>
+
+<script>
+
+    function showOffcanvas(mal_id){
+        var offcanvasElement = document.getElementById(`offcanvas${mal_id}`);
+        var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+        var imgElement = document.querySelector(`#image${mal_id}`);
+
+        imgElement.addEventListener('click', function() {
+            offcanvas.show();
+
+            setTimeout(function() {
+                offcanvas.hide();
+            }, 5000);
+        });
+
+        offcanvasElement.addEventListener('hidden.bs.offcanvas', function() {
+            // Adicione qualquer comportamento adicional aqui quando o offcanvas for fechado
+        });
+    }
+
+    function hideOffcanvas(mal_id){
+        var offcanvasElement = document.getElementById(`offcanvas${mal_id}`);
+        var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+        offcanvas.hide();
+    }
+
+</script>
 
