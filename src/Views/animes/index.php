@@ -35,7 +35,7 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <a class="btn btn-primary my-1" href="products.html">Apply Filter</a>
+                        <a class="btn btn-success my-1" href="products.html">Apply Filter</a>
                         <a class="btn btn-info my-1" href="products.html">Search Now</a>
                     </div>
                 </div>
@@ -64,6 +64,10 @@
                              data-bs-backdrop="false" tabindex="-1" id="offcanvas<?=$anime->mal_id?>"
                              aria-labelledby="offcanvas<?=$anime->mal_id?>Label">
                             <div class="offcanvas-header border-bottom border-block-end-dashed">
+                                <div class="fs-6">
+                                    <img class="avatar me-2 avatar-rounded" src="https://cdn.myanimelist.net/images/favicon.ico">
+                                    <?=$anime->mal_id?>
+                                </div>
                                 <button type="button" class="ms-auto btn-close"></button>
                             </div>
                             <div class="offcanvas-body">
@@ -71,22 +75,22 @@
                                 <div class="mb-2">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div><span class="text-muted fs-13">Score</span></div>
-                                        <div><span class="text-primary fs-12"><?=$anime->score?></span></div>
+                                        <div><span class="tbtn-success fs-12"><?=$anime->score?></span></div>
                                     </div>
                                     <div>
                                         <div class="progress progress-animate progress-xs mt-1" role="progressbar" aria-valuenow="<?=$anime->score*10?>" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar bg-primary" style="width: <?=$anime->score*10?>%"></div>
+                                            <div class="progress-bar bg-success-gradient" style="width: <?=$anime->score*10?>%"></div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="text-muted d-flex align-items-center justify-content-between my-2">
-                                    <span class="text-primary">Rank</span>
+                                    <span class="tbtn-success">Rank</span>
                                     <span><?=$anime->rank?></span>
                                 </div>
 
                                 <div class="text-muted d-flex align-items-center justify-content-between my-2">
-                                    <span class="text-primary">Episódios</span>
+                                    <span class="tbtn-success">Episódios</span>
                                     <span><?=$anime->episodes?></span>
                                 </div>
 
@@ -128,7 +132,7 @@
                                         <?=$anime->status?>
                                     </div>
                                     <div>
-                                        <i class="ri-check-double-fill <?=$anime->approved ? 'text-primary' : 'text-danger'?> me-1 align-middle d-inline-block"></i>
+                                        <i class="ri-check-double-fill <?=$anime->approved ? 'tbtn-success' : 'text-danger'?> me-1 align-middle d-inline-block"></i>
                                     </div>
                                 </div>
 
@@ -147,7 +151,11 @@
                                     </div>
                                 </div>
 
-
+                            </div>
+                            <div class="offcanvas-bottom text-center">
+                                <a href="/animes/<?=$anime->mal_id?>" class="align-items-center text-success">
+                                    <i class="ri-arrow-right-circle-line"></i> Ver todos os detalhes
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -163,16 +171,16 @@
 
                                 <div class="w-auto d-flex justify-content-between">
 
-                                    <button class="btn btn-lg btn-icon btn-primary-transparent rounded-pill btn-wave">
+                                    <button class="btn btn-lg btn-icon btn-success-gradient rounded-pill btn-wave">
                                         <i class="ri-heart-2-fill"></i>
                                     </button>
-                                    <button class="btn btn-lg btn-icon btn-primary-transparent rounded-pill btn-wave">
+                                    <button class="btn btn-lg btn-icon btn-success-gradient rounded-pill btn-wave">
                                         <i class="ri-check-double-fill"></i>
                                     </button>
-                                    <button class="btn btn-lg btn-icon btn-primary-transparent rounded-pill btn-wave">
+                                    <button class="btn btn-lg btn-icon btn-success-gradient rounded-pill btn-wave">
                                         <i class="ri-time-fill"></i>
                                     </button>
-                                    <button class="btn btn-lg btn-icon btn-primary-transparent rounded-pill btn-wave"
+                                    <button class="btn btn-lg btn-icon btn-success-gradient rounded-pill btn-wave"
                                             data-bs-toggle="offcanvas" data-bs-target="#offcanvas<?=$anime->mal_id?>"
                                             aria-controls="offcanvas<?=$anime->mal_id?>">
                                         <i class="ri-information-fill"></i>
@@ -181,7 +189,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                 </div>
