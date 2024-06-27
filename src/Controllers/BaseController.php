@@ -7,6 +7,7 @@ use PDO;
 class BaseController
 {
     protected $pdo;
+    public $functions;
 
     public function __construct()
     {

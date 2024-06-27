@@ -14,6 +14,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
     );
 
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'Statickidz\\' => 11,
+        ),
         'R' => 
         array (
             'Ramsey\\Uuid\\' => 12,
@@ -23,6 +27,7 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         array (
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'G' => 
         array (
@@ -41,6 +46,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
     );
 
     public static $prefixDirsPsr4 = array (
+        'Statickidz\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/statickidz/php-google-translate-free/src',
+        ),
         'Ramsey\\Uuid\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/uuid/src',
@@ -57,6 +66,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         'Psr\\Http\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

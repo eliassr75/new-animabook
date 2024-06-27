@@ -8,6 +8,12 @@ class Router
 
     public function addRoute($method, $url, $controller, $action)
     {
+        // Transformar URL em regex e identificar parâmetros dinâmicos
+        $url = rtrim($url, '/') . '/';
+        $url = preg_replace('/\//', '\\/', $url);
+        $url = preg_replace('/\{(\w+)\}/', '(?P<$1>[^\/]+)', $url);
+        $url = '/^' . $url . '$/';
+
         $this->routes[] = [
             'method' => $method,
             'url' => $url,
@@ -24,10 +30,14 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
 
         foreach ($this->routes as $route) {
-            if ($route['method'] == $method && $route['url'] == $uri) {
+            if ($route['method'] == $method && preg_match($route['url'], $uri, $matches)) {
                 $controllerName = $route['controller'];
                 $controller = new $controllerName();
-                call_user_func([$controller, $route['action']]);
+
+                // Remover itens que não são parâmetros da URL
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+
+                call_user_func_array([$controller, $route['action']], $params);
                 return;
             }
         }

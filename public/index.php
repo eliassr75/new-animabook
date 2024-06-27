@@ -1,16 +1,14 @@
 <?php
 
-session_start();
+require_once '../config/cors.php';
+require_once '../vendor/autoload.php';
+require_once '../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === "GET"){
     header("Content-type: text/html; charset=utf-8");
 }else{
     header("Content-type: application/json; charset=utf-8");
 }
-
-
-require_once '../vendor/autoload.php';
-require_once '../config/database.php';
 
 use App\Router;
 use App\Controllers\MenuController;
@@ -35,9 +33,13 @@ $router->addRoute('DELETE', '/api/menu_items/', MenuController::class, 'removeMe
 
 // ROTAS USERS - GET
 $router->addRoute('GET', '/users/', UserController::class, 'showAllUsers');
+$router->addRoute('GET', '/users/{userId}/post/{newId}/', UserController::class, 'getUserById');
+
 
 //ROTAS ANIMES - GET
 $router->addRoute('GET', '/animes/', AnimeController::class, 'showAllAnimes');
+$router->addRoute('GET', '/animes/all/', AnimeController::class, 'getAllAnimes');
+$router->addRoute('GET', '/animes/{malId}/', AnimeController::class, 'updateAnime');
 
 
 $router->handleRequest();

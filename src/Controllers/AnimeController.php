@@ -3,41 +3,15 @@
 namespace App\Controllers;
 
 use App\Models\Anime;
-use GuzzleHttp\Client;
+use Statickidz\GoogleTranslate;
+use stdClass;
 
 class AnimeController extends BaseController
 {
 
     protected $url = "https://api.jikan.moe/v4/";
     public $query = null;
-    public $api = false;
 
-    public function sendRequest($requestData, $method)
-    {
-        $client = new Client();
-
-        $response = $client->$method("{$this->url}{$this->query}", [
-            'headers' => ['Content-Type' => 'application/json'],
-            ($method == "get" ? 'query': 'body') => ($method == "get" ? $requestData : json_encode($requestData, true))
-        ]);
-
-        try {
-            return json_decode($response->getBody());
-        }catch (Exception $e){
-            return ["error" => $e->getMessage()];
-        }
-    }
-
-    public function sendResponse($responseData, $statusCode = 200)
-    {
-        if($this->api){
-            http_response_code($statusCode);
-            return json_encode($responseData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        }else{
-            return $responseData;
-        }
-
-    }
 
     public function getAllFilters()
     {
@@ -97,9 +71,21 @@ class AnimeController extends BaseController
         ];
     }
 
+    public function getAnimeById($animeId) {
+        echo "Anime ID: " . htmlspecialchars($animeId, ENT_QUOTES, 'UTF-8');
+    }
+    public function getAllAnimes()
+    {
+        $functions = new FunctionController();
+        $animes = Anime::all($this->pdo);
+        echo '<pre>';
+        print_r($animes);
+        echo '</pre>';
+    }
+
     public function getAll($type="tv", $filter="bypopularity", $rating="g", $page=1, $limit=24)
     {
-
+        $functions = new FunctionController();
         $parameters = [
             "anime_search_query_type" => $type,
             "top_anime_filter" => $filter,
@@ -108,12 +94,142 @@ class AnimeController extends BaseController
             "page" => $page,
             "limit" => $limit
         ];
-        $response = $this->sendRequest($parameters, "get");
+
+        $response = $functions->sendRequest($parameters, "{$this->url}{$this->query}", "get");
         if (!empty($response->error)) {
-            return $this->sendResponse($response, 500);
+            return $functions->sendResponse($response, 500);
         } else {
-            return $this->sendResponse($response);
+            return $functions->sendResponse($response);
         }
+    }
+
+    public function createAnime($malId)
+    {
+        $this->query = "anime/$malId/full/";
+        $functions = new FunctionController();
+        $functions->api = true;
+
+        $anime = Anime::where($this->pdo, ['mal_id' => $malId]);
+        if ($anime) {
+            $functions->sendResponse(["message" => "Anime already exists"], 400);
+        } else {
+            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
+
+            $anime = new Anime($this->pdo);
+            foreach ($anime->allowed_keys as $key) {
+
+                if ($key == "episodes_counter"){
+                    $anime->$key = $response->data->episodes;
+                }else{
+                    switch (gettype($response->data->$key)) {
+                        case 'boolean':
+                            $anime->$key = (int)$response->data->$key;
+                            break;
+                        case 'object':
+                            $anime->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                            break;
+                        default:
+
+                            break;
+                    }
+                }
+            }
+
+            $source = 'en';
+            $target = 'pt-br';
+            $translator = new GoogleTranslate();
+
+            try {
+                if(!empty($anime->background)){
+                    $anime->background = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->background));
+                }
+                if(!empty($anime->synopsis)) {
+                    $anime->synopsis = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->synopsis));
+                }
+            } catch (Exception $e) {
+
+            }
+
+            $anime->save();
+
+            echo '<pre>';
+            print_r($anime);
+            echo '</pre>';
+
+        }
+
+    }
+
+    public function updateAnime($malId)
+    {
+        $this->query = "anime/$malId/full/";
+        $functions = new FunctionController();
+        $functions->api = true;
+
+        $animeModel = new Anime($this->pdo);
+        $anime = $animeModel->where('mal_id', '=', $malId)->get();
+        if ($anime) {
+            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
+
+            $keys = new Anime($this->pdo);
+            $stmt = [];
+            foreach ($keys->allowed_keys as $key) {
+
+                /*
+                 *
+                 *
+                 * objeto.prop.etc.....
+                 * objeto['prop']......
+                 *
+                 * $objeto->prop->etc......
+                 * $objeto->variavel
+                 *
+                 *
+                 * */
+
+                if ($key == "episodes_counter"){
+                    $stmt[$key] = $response->data->episodes;
+                }else{
+                    switch (gettype($response->data->$key)) {
+                        case 'boolean':
+                            $stmt[$key] = (int)$response->data->$key;
+                            break;
+                        case 'object':
+                            $stmt[$key] = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                            break;
+                        default:
+                            $stmt[$key] = $response->data->$key;
+                            break;
+                    }
+                }
+            }
+
+            $source = 'en';
+            $target = 'pt-br';
+            $translator = new GoogleTranslate();
+
+            try {
+                if(!empty($response->data->background)){
+                    $stmt['background'] = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->background));
+                }
+                if(!empty($response->data->synopsis)) {
+                    $stmt['synopsis'] = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->synopsis));
+                }
+            } catch (Exception $e) {
+
+            }
+
+            $animeModel->where('mal_id', '=', $malId)->update($stmt);
+
+            echo '<pre>';
+            print_r($animeModel->where('mal_id', '=', $malId)->get());
+            echo '</pre>';
+
+        } else {
+            $functions->sendResponse(["message" => "Anime not founded"], 404);
+
+        }
+
     }
 
     public function createUser()

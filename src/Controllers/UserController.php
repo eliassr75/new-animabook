@@ -6,6 +6,9 @@ use App\Models\User;
 
 class UserController extends BaseController
 {
+    public function getUserById($userId) {
+        echo "User ID: " . htmlspecialchars($userId, ENT_QUOTES, 'UTF-8');
+    }
     public function getAllUsers()
     {
         $users = User::all($this->pdo);

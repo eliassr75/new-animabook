@@ -2,6 +2,17 @@
 <?php require_once __DIR__ . '/../htmlHead.php'; ?>
 <?php require_once __DIR__ . '/../bodyContentInit.php'; ?>
 
+
+<?php print_r($users); print($users[0]->name)?>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 <div class="alert alert-solid-secondary alert-dismissible fs-15 fade show mb-4">
     We Placed <strong class="text-fixed-black">Datatables</strong> only in this page by using <strong class="text-fixed-black">jquery</strong> cdn link.
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x"></i></button>

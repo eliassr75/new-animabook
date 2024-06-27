@@ -10,6 +10,8 @@ abstract class BaseModel {
     protected $table;
     protected $columns;
 
+    private $whereConditions = [];
+
     public function __construct($pdo) {
         $this->pdo = $pdo;
     }
@@ -27,7 +29,7 @@ abstract class BaseModel {
             $columns = [];
             $params = [];
             foreach ($this->columns as $column) {
-                if ($column != 'id' || $column != 'created') {
+                if ($column != 'id' && $column != 'created') {
                     $columns[] = "$column = :$column";
                     $params[$column] = $this->$column;
                 }
@@ -39,7 +41,6 @@ abstract class BaseModel {
             $placeholders = [];
             $params = [];
             foreach ($this->columns as $column) {
-
                 switch ($column){
                     case 'id':
                     case 'created':
@@ -74,15 +75,15 @@ abstract class BaseModel {
         $instance = new static($pdo);
         $sql = "SELECT * FROM $instance->table";
         $stmt = $pdo->query($sql);
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-//        $models = [];
-//        foreach ($results as $result) {
-//            $model = new static($pdo);
-//            $model->mapData($result);
-//            $models[] = $model;
-//        }
-        return $results;
+        $models = [];
+        foreach ($results as $result) {
+            $model = new static($pdo);
+            $model->mapData($result);
+            $models[] = $model;
+        }
+        return $models;
     }
 
     public static function find($pdo, $id) {
@@ -98,5 +99,56 @@ abstract class BaseModel {
         }
         return null;
     }
+
+    public function where($column, $operator, $value) {
+        $this->whereConditions[] = "$column $operator :$column";
+        $this->params[$column] = $value;
+        return $this;
+    }
+
+    public function get_all() {
+        $sql = "SELECT * FROM $this->table";
+        if (!empty($this->whereConditions)) {
+            $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($this->params);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public function get() {
+        $sql = "SELECT * FROM $this->table";
+        if (!empty($this->whereConditions)) {
+            $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($this->params);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public function update($data) {
+        if (empty($this->whereConditions)) {
+            throw new Exception('Update method requires at least one where condition.');
+        }
+
+        $columns = [];
+        $params = [];
+        foreach ($data as $column => $value) {
+            $columns[] = "$column = :$column";
+            $params[$column] = $value;
+        }
+
+        $updated = "";
+        if(in_array('updated', $this->columns)){
+            $updated = "updated = now(), ";
+        }
+
+        $sql = "UPDATE $this->table SET $updated" . implode(', ', $columns);
+        if (!empty($this->whereConditions)) {
+            $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array_merge($params));
+    }
 }
-?>

@@ -222,29 +222,5 @@
 
 <script>
 
-    function showOffcanvas(mal_id){
-        var offcanvasElement = document.getElementById(`offcanvas${mal_id}`);
-        var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
-        var imgElement = document.querySelector(`#image${mal_id}`);
-
-        imgElement.addEventListener('click', function() {
-            offcanvas.show();
-
-            setTimeout(function() {
-                offcanvas.hide();
-            }, 5000);
-        });
-
-        offcanvasElement.addEventListener('hidden.bs.offcanvas', function() {
-            // Adicione qualquer comportamento adicional aqui quando o offcanvas for fechado
-        });
-    }
-
-    function hideOffcanvas(mal_id){
-        var offcanvasElement = document.getElementById(`offcanvas${mal_id}`);
-        var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
-        offcanvas.hide();
-    }
-
 </script>
 
