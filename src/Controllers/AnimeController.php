@@ -154,10 +154,15 @@ class AnimeController extends BaseController
 
             $animeModel->save();
 
-            $titlesController->anime_id = $malId;
-            $responseTitles = $titlesController->checkTitles($response->data->titles);
-            if($responseTitles->success){
-                $anime->titles = $titlesController->get_all();
+            if (isset($response->data->titles)) {
+
+                $titlesController = new TitlesController();
+
+                $titlesController->anime_id = $malId;
+                $titlesController->titles = $response->data->titles;
+                $responseTitles = $titlesController->checkTitles();
+                $animeModel->titles = $titlesController->get_all();
+
             }
 
             echo '<pre>';
@@ -218,18 +223,28 @@ class AnimeController extends BaseController
             $animeModel->where('mal_id', '=', $malId)->update($stmt);
             $anime = $animeModel->where('mal_id', '=', $malId)->get();
 
-            $titlesController = new TitlesController();
-            $titlesController->anime_id = $malId;
-            $responseTitles = $titlesController->checkTitles($response->data->titles);
-            if(isset($responseTitles->success)){
-                $anime->titles = $titlesController->get_all();
-            }else{
-                $anime->titles = $responseTitles;
+            if (isset($response->data->titles)) {
+
+                $titlesController = new TitlesController();
+
+                $titlesController->anime_id = $malId;
+                $titlesController->titles = $response->data->titles;
+                $responseTitles = $titlesController->checkTitles();
+
+                if (isset($responseTitles['success'])) { // Assume que checkTitles retorna um array com 'success'
+                    $anime->titles = $titlesController->get_all();
+                } else {
+                    $anime->titles = $responseTitles;
+                }
+
             }
 
             echo '<pre>';
             print_r($anime);
+            echo "<hr>";
+            print_r($response->data);
             echo '</pre>';
+
 
         } else {
             $functions->sendResponse(["message" => "Anime not founded"], 404);

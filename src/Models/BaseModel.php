@@ -101,7 +101,16 @@ abstract class BaseModel {
     }
 
     public function where($column, $operator, $value) {
-        $this->whereConditions[] = "$column $operator :$column";
+
+        switch($operator){
+            case 'like':
+                $this->whereConditions[] = "$column $operator '%:$column%'";
+                break;
+            default:
+                $this->whereConditions[] = "$column $operator :$column";
+                break;
+        }
+
         $this->params[$column] = $value;
         return $this;
     }
@@ -110,7 +119,10 @@ abstract class BaseModel {
         $sql = "SELECT * FROM $this->table";
         if (!empty($this->whereConditions)) {
             $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }else{
+            $this->whereConditions = [];
         }
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($this->params);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -120,7 +132,10 @@ abstract class BaseModel {
         $sql = "SELECT * FROM $this->table";
         if (!empty($this->whereConditions)) {
             $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }else{
+            $this->whereConditions = [];
         }
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($this->params);
         return $stmt->fetch(PDO::FETCH_OBJ);
@@ -134,6 +149,7 @@ abstract class BaseModel {
         $columns = [];
         $params = [];
         foreach ($data as $column => $value) {
+
             $columns[] = "$column = :$column";
             $params[$column] = $value;
         }
@@ -146,6 +162,8 @@ abstract class BaseModel {
         $sql = "UPDATE $this->table SET $updated" . implode(', ', $columns);
         if (!empty($this->whereConditions)) {
             $sql .= " WHERE " . implode(' AND ', $this->whereConditions);
+        }else{
+            $this->whereConditions = [];
         }
 
         $stmt = $this->pdo->prepare($sql);
