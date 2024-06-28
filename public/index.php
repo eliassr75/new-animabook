@@ -39,7 +39,8 @@ $router->addRoute('GET', '/users/{userId}/post/{newId}/', UserController::class,
 //ROTAS ANIMES - GET
 $router->addRoute('GET', '/animes/', AnimeController::class, 'showAllAnimes');
 $router->addRoute('GET', '/animes/all/', AnimeController::class, 'getAllAnimes');
-$router->addRoute('GET', '/animes/{malId}/', AnimeController::class, 'updateAnime');
+$router->addRoute('GET', '/anime/create/{malId}/', AnimeController::class, 'createAnime');
+$router->addRoute('GET', '/anime/update/{malId}/', AnimeController::class, 'updateAnime');
 
 
 $router->handleRequest();

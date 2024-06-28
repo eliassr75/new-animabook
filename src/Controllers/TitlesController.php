@@ -9,49 +9,47 @@ use GuzzleHttp\Client;
 class TitlesController extends BaseController
 {
 
-    public int $anime_id = 0;
-    public function createTitle(): void
+    public $anime_id;
+
+    public function get_all()
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (!empty($data['title']) && !empty($data['type']) && !empty($data['anime_id'])) {
-            $user = new Titles($this->pdo);
-            $user->title = $data['title'];
-            $user->type = $data['type'];
-            $user->anime_id = $data['anime_id'];
-            $user->save();
-
-            header('Content-Type: application/json');
-            echo json_encode(['message' => 'Title criado com sucesso']);
-        } else {
-            header('Content-Type: application/json', true, 400);
-            echo json_encode(['message' => 'Dados incompletos']);
-        }
+        $titlesModel = new Titles($this->pdo);
+        return $titlesModel->where('anime_id', '=', $this->anime_id)->get_all();
     }
 
-    public function createTitleByApi($titles): void
+    public function checkTitles($titles)
     {
-
         $functions = new FunctionController();
-        $functions->api = true;
 
-        $inserteds = [];
         foreach ($titles as $title) {
             if (!empty($title->title) && !empty($title->type) && !$this->anime_id) {
 
-                $titles = new Titles($this->pdo);
-                $titles->title = $title->title;
-                $titles->type = $title->type;
-                $titles->anime_id = $this->anime_id;
-                $titles->save();
+                $titleModel = new Titles($this->pdo);
+                $title_search = $titleModel->
+                where('title', 'like', "%{$title->title}%")->
+                where('type', 'like', "%{$title->type}%")->
+                where('anime_id', '=', $this->anime_id)->
+                get();
 
-                $inserteds[] = $titles->title;
+                if(!$title_search) {
+
+                    $titleModel->title = $title->title;
+                    $titleModel->type = $title->type;
+                    $titleModel->anime_id = $this->anime_id;
+                    $titleModel->save();
+
+                }else{
+                    $stmt = [
+                        'title' => $title->title,
+                        'type' => $title->type
+                    ];
+                    $titleModel->where('id', '=', $title->id)->update($stmt);
+                }
+
             } else {
-                $functions->sendResponse(['message' => 'Dados incompletos'], 400);
+                $functions->sendResponse(['error' => 'Dados incompletos']);
             }
         }
-        $functions->sendResponse(['message' => 'Títulos ' . implode(', ', $inserteds) .  ' criados com sucesso'], 400);
-
+        $functions->sendResponse(['success' => 'Titles checked successfully']);
     }
-
 }

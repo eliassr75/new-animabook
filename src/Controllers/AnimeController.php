@@ -109,27 +109,29 @@ class AnimeController extends BaseController
         $functions = new FunctionController();
         $functions->api = true;
 
-        $anime = Anime::where($this->pdo, ['mal_id' => $malId]);
+        $titlesController = new TitlesController();
+
+        $animeModel = new Anime($this->pdo);
+        $anime = $animeModel->where('mal_id', '=', $malId)->get();
         if ($anime) {
             $functions->sendResponse(["message" => "Anime already exists"], 400);
         } else {
-            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
 
-            $anime = new Anime($this->pdo);
-            foreach ($anime->allowed_keys as $key) {
+            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
+            foreach ($animeModel->allowed_keys as $key) {
 
                 if ($key == "episodes_counter"){
-                    $anime->$key = $response->data->episodes;
+                    $animeModel->$key = $response->data->episodes;
                 }else{
                     switch (gettype($response->data->$key)) {
                         case 'boolean':
-                            $anime->$key = (int)$response->data->$key;
+                            $animeModel->$key = (int)$response->data->$key;
                             break;
                         case 'object':
-                            $anime->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                            $animeModel->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
                             break;
                         default:
-
+                            $animeModel->$key = $response->data->$key;
                             break;
                     }
                 }
@@ -140,20 +142,26 @@ class AnimeController extends BaseController
             $translator = new GoogleTranslate();
 
             try {
-                if(!empty($anime->background)){
-                    $anime->background = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->background));
+                if(!empty($animeModel->background)){
+                    $animeModel->background = str_replace("\n\n", "<br>", $translator->translate($source, $target, $animeModel->background));
                 }
-                if(!empty($anime->synopsis)) {
-                    $anime->synopsis = str_replace("\n\n", "<br>", $translator->translate($source, $target, $anime->synopsis));
+                if(!empty($animeModel->synopsis)) {
+                    $animeModel->synopsis = str_replace("\n\n", "<br>", $translator->translate($source, $target, $animeModel->synopsis));
                 }
             } catch (Exception $e) {
 
             }
 
-            $anime->save();
+            $animeModel->save();
+
+            $titlesController->anime_id = $malId;
+            $responseTitles = $titlesController->checkTitles($response->data->titles);
+            if($responseTitles->success){
+                $anime->titles = $titlesController->get_all();
+            }
 
             echo '<pre>';
-            print_r($anime);
+            print_r($animeModel);
             echo '</pre>';
 
         }
@@ -169,23 +177,11 @@ class AnimeController extends BaseController
         $animeModel = new Anime($this->pdo);
         $anime = $animeModel->where('mal_id', '=', $malId)->get();
         if ($anime) {
-            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
 
+            $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
             $keys = new Anime($this->pdo);
             $stmt = [];
             foreach ($keys->allowed_keys as $key) {
-
-                /*
-                 *
-                 *
-                 * objeto.prop.etc.....
-                 * objeto['prop']......
-                 *
-                 * $objeto->prop->etc......
-                 * $objeto->variavel
-                 *
-                 *
-                 * */
 
                 if ($key == "episodes_counter"){
                     $stmt[$key] = $response->data->episodes;
@@ -220,9 +216,19 @@ class AnimeController extends BaseController
             }
 
             $animeModel->where('mal_id', '=', $malId)->update($stmt);
+            $anime = $animeModel->where('mal_id', '=', $malId)->get();
+
+            $titlesController = new TitlesController();
+            $titlesController->anime_id = $malId;
+            $responseTitles = $titlesController->checkTitles($response->data->titles);
+            if(isset($responseTitles->success)){
+                $anime->titles = $titlesController->get_all();
+            }else{
+                $anime->titles = $responseTitles;
+            }
 
             echo '<pre>';
-            print_r($animeModel->where('mal_id', '=', $malId)->get());
+            print_r($anime);
             echo '</pre>';
 
         } else {
@@ -230,25 +236,6 @@ class AnimeController extends BaseController
 
         }
 
-    }
-
-    public function createUser()
-    {
-//        $data = json_decode(file_get_contents('php://input'), true);
-//
-//        if (!empty($data['name']) && !empty($data['email']) && !empty($data['password'])) {
-//            $user = new User($this->pdo);
-//            $user->name = $data['name'];
-//            $user->email = $data['email'];
-//            $user->password = password_hash($data['password'], PASSWORD_DEFAULT);
-//            $user->save();
-//
-//            header('Content-Type: application/json');
-//            echo json_encode(['message' => 'Usuário criado com sucesso']);
-//        } else {
-//            header('Content-Type: application/json', true, 400);
-//            echo json_encode(['message' => 'Dados incompletos']);
-//        }
     }
 
     public function showAllAnimes()
