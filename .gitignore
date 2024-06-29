@@ -4,3 +4,4 @@ config/function.txt
 docker-compose.yml
 install.sql
 .idea
+vendor/*
