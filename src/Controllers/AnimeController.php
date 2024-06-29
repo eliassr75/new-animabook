@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Anime;
+use Exception;
 use Statickidz\GoogleTranslate;
 use stdClass;
 
@@ -109,10 +110,8 @@ class AnimeController extends BaseController
         $functions = new FunctionController();
         $functions->api = true;
 
-        $titlesController = new TitlesController();
-
-        $animeModel = new Anime($this->pdo);
-        $anime = $animeModel->where('mal_id', '=', $malId)->get();
+        $animeModel = new Anime();
+        $anime = $animeModel->where('mal_id', $malId)->first();
         if ($anime) {
             $functions->sendResponse(["message" => "Anime already exists"], 400);
         } else {
@@ -157,11 +156,9 @@ class AnimeController extends BaseController
             if (isset($response->data->titles)) {
 
                 $titlesController = new TitlesController();
-
                 $titlesController->anime_id = $malId;
                 $titlesController->titles = $response->data->titles;
-                $responseTitles = $titlesController->checkTitles();
-                $animeModel->titles = $titlesController->get_all();
+                $titlesController->checkTitles();
 
             }
 
@@ -179,29 +176,22 @@ class AnimeController extends BaseController
         $functions = new FunctionController();
         $functions->api = true;
 
-        $animeModel = new Anime($this->pdo);
-        $anime = $animeModel->where('mal_id', '=', $malId)->get();
+        $animeModel = new Anime();
+        $anime = $animeModel->where('mal_id', $malId)->get();
         if ($anime) {
 
             $response = $functions->sendRequest([], "{$this->url}{$this->query}", "get");
-            $keys = new Anime($this->pdo);
             $stmt = [];
-            foreach ($keys->allowed_keys as $key) {
+            foreach ($animeModel->allowed_keys as $key) {
 
                 if ($key == "episodes_counter"){
                     $stmt[$key] = $response->data->episodes;
                 }else{
-                    switch (gettype($response->data->$key)) {
-                        case 'boolean':
-                            $stmt[$key] = (int)$response->data->$key;
-                            break;
-                        case 'object':
-                            $stmt[$key] = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                            break;
-                        default:
-                            $stmt[$key] = $response->data->$key;
-                            break;
-                    }
+                    $stmt[$key] = match (gettype($response->data->$key)) {
+                        'boolean' => (int)$response->data->$key,
+                        'object' => json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                        default => $response->data->$key,
+                    };
                 }
             }
 
@@ -220,31 +210,29 @@ class AnimeController extends BaseController
 
             }
 
-            $animeModel->where('mal_id', '=', $malId)->update($stmt);
-            $anime = $animeModel->where('mal_id', '=', $malId)->get();
+            $animeModel->where('mal_id', $malId)->update($stmt);
+            $anime = $animeModel->where('mal_id', $malId)->get();
 
             if (isset($response->data->titles)) {
 
                 $titlesController = new TitlesController();
-
                 $titlesController->anime_id = $malId;
                 $titlesController->titles = $response->data->titles;
-                $responseTitles = $titlesController->checkTitles();
-
-                if (isset($responseTitles['success'])) { // Assume que checkTitles retorna um array com 'success'
-                    $anime->titles = $titlesController->get_all();
-                } else {
-                    $anime->titles = $responseTitles;
-                }
+                $titlesController->checkTitles();
 
             }
 
-            echo '<pre>';
-            print_r($anime);
-            echo "<hr>";
-            print_r($response->data);
-            echo '</pre>';
+            if (isset($response->data->title_synonyms)) {
 
+                $titlesSynonymsController = new TitlesSynonymsController();
+                $titlesSynonymsController->anime_id = $malId;
+                $titlesSynonymsController->titles = $response->data->title_synonyms;
+                $titlesSynonymsController->checkTitlesSynonyms();
+
+            }
+
+            print_r($response->data);
+            print_r($anime);
 
         } else {
             $functions->sendResponse(["message" => "Anime not founded"], 404);

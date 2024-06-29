@@ -1,27 +1,50 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
 use PDO;
 
-class MenuItem
+class MenuItem extends Model
 {
-    public $id;
-    public $title;
-    public $link;
-    public $category;
-    public $isVisible;
+    protected $table = "menu_items";
 
-    public static function getByCategory($pdo, $category)
+    protected $fillable = [
+        'id',
+        'title',
+        'link',
+        'category',
+        'is_visible',
+        'type',
+        'staff',
+        'method',
+        'action',
+        'controller'
+    ];
+
+    protected $guarded = ['id'];
+
+    public $allowed_keys = [
+        'title',
+        'link',
+        'category',
+        'is_visible',
+        'type',
+        'staff',
+        'method',
+        'action',
+        'controller'
+    ];
+
+    public static function getByCategory( $category)
     {
-        $stmt = $pdo->prepare("SELECT id, title, link, is_visible FROM menu_items WHERE is_visible = 'true' AND category = :category order by title");
-        $stmt->execute(['category' => $category]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return MenuItem::where('category', $category)
+            ->where('is_visible', 'true')
+            ->orderBy('title', 'asc')
+            ->get();
     }
 
-    public static function getAll($pdo)
+    public static function getAll()
     {
-        $stmt = $pdo->prepare("SELECT * FROM menu_items order by title");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return MenuItem::all();
     }
 }

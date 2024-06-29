@@ -5,6 +5,7 @@ namespace App\Validators;
 use App\Models\User;
 use App\Models\Anime;
 use App\Models\Titles;
+use App\Models\TitlesSynonyms;
 use Exception;
 
 class Validator {
@@ -18,6 +19,16 @@ class Validator {
         }
         if (empty($title->type)) {
             throw new Exception("O Tipo não pode ser nulo.");
+        }
+    }
+
+    public static function validateTitleSynonyms(Titles $title): void
+    {
+        if (empty($title->title)) {
+            throw new Exception("O Título não pode ser nulo.");
+        }
+        if (empty($title->anime_id)) {
+            throw new Exception("O Id do Anime não pode ser nulo.");
         }
     }
     public static function validateUser(User $user): void

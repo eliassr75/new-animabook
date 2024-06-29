@@ -6,20 +6,18 @@ use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
 
 #[\AllowDynamicProperties]
-class Titles extends Model
+class TitlesSynonyms extends Model
 {
 
     const allowed_keys = [
         'title',
-        'type',
         'anime_id'
     ];
 
-    protected $table = "titles";
+    protected $table = "titles_synonyms";
     protected $fillable = [
         'id',
         'title',
-        'type',
         'anime_id'
     ];
 
@@ -33,6 +31,6 @@ class Titles extends Model
     }
 
     public function validate() {
-        Validator::validateTitle($this);
+        Validator::validateTitleSynonyms($this);
     }
 }

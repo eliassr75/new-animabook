@@ -8,7 +8,7 @@ class MenuController extends BaseController
 {
     public function getMenuItemsByCategory($category)
     {
-        $menuItems = MenuItem::getByCategory($this->pdo, $category);
+        $menuItems = MenuItem::getByCategory($category);
         return $menuItems;
     }
 
@@ -18,14 +18,11 @@ class MenuController extends BaseController
         return $menuItems;
     }
 
-    public function sendResponse($responseData, $statusCode = 200)
-    {
-        header('Content-Type: application/json', true, $statusCode);
-        echo json_encode($responseData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    }
-
     public function createMenuItem()
     {
+        $functions = new FunctionController();
+        $menuItemModel = new MenuItem();
+
         $data = json_decode(file_get_contents('php://input'), true);
 
         if (!empty($data['title']) && !empty($data['link']) && !empty($data['category'])) {
@@ -34,43 +31,60 @@ class MenuController extends BaseController
                 $data['type'] = "navbar";
             }
 
-            $query = "INSERT INTO menu_items (title, link, category, type) VALUES (:title, :link, :category, :type)";
-            $this->pdo->prepare($query)->execute([$data['title'], $data['link'], $data['category'], $data['type']]);
+            $stmt = [
+                "title" => $data['title'],
+                "link" => $data['link'],
+                "category" => $data['category'],
+                "type" => $data['type']
+            ];
 
+            $menuItemModel->create($stmt);
 
-            $this->sendResponse(['message' => 'Categoria criada com sucesso']);
+            $functions->sendResponse(['message' => 'Categoria criada com sucesso']);
         } else {
-            $this->sendResponse(['message' => 'Dados incompletos', 'receive' => json_encode($data, true)], 400);
+            $functions->sendResponse(['message' => 'Dados incompletos', 'receive' => json_encode($data, true)], 400);
         }
     }
 
     public function updateMenuItem()
     {
+
+        $functions = new FunctionController();
+        $menuItemModel = new MenuItem();
+
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!empty($data['title']) && !empty($data['link']) && !empty($data['category'] && !empty($category['id']))) {
+        if (!empty($data['title']) && !empty($data['link']) && !empty($data['category'] && !empty($data['id']))) {
 
-            $query = "UPDATE menu_items SET title = :title, link = :link, category = :category WHERE id = :id";
-            $this->pdo->prepare($query)->execute([$data['title'], $data['link'], $data['category'], $data['id']]);
+            $menuItem = $menuItemModel->find($data['id']);
 
-            $this->sendResponse(['message' => 'Categoria atualizada com sucesso']);
+            $stmt = [
+                "title" => $data['title'],
+                "link" => $data['link'],
+                "category" => $data['category'],
+                "type" => $data['type']
+            ];
+
+            $menuItem->update($stmt);
+            $functions->sendResponse(['message' => 'Categoria atualizada com sucesso']);
         } else {
-            $this->sendResponse(['message' => 'Dados incompletos'], 400);
+            $functions->sendResponse(['message' => 'Dados incompletos'], 400);
         }
     }
 
     public function removeMenuItem()
     {
+
+        $functions = new FunctionController();
+        $menuItemModel = new MenuItem();
+
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!empty($category['id'])) {
-
-            $query = "DELETE FROM menu_items WHERE id = :id";
-            $this->pdo->prepare($query)->execute([$data['id']]);
-
-            $this->sendResponse(['message' => 'Categoria removida com sucesso']);
+        if (!empty($data['id'])) {
+            $menuItemModel->where('id', $data['id'])->delete();
+            $functions->sendResponse(['message' => 'Categoria removida com sucesso']);
         } else {
-            $this->sendResponse(['message' => 'Dados incompletos'], 400);
+            $functions->sendResponse(['message' => 'Dados incompletos'], 400);
         }
     }
 

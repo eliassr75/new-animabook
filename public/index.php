@@ -1,8 +1,8 @@
 <?php
 
 require_once '../config/cors.php';
-require_once '../vendor/autoload.php';
-require_once '../config/database.php';
+require '../vendor/autoload.php';
+require '../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === "GET"){
     header("Content-type: text/html; charset=utf-8");

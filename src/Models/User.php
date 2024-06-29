@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Exception;
 use App\Validators\Validator;
+use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
-class User extends BaseModel {
+class User extends Model {
     protected $table = 'users';
     protected $columns = [
         'id',
