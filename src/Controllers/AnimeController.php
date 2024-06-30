@@ -3,9 +3,10 @@
 namespace App\Controllers;
 
 use App\Models\Anime;
+use App\Models\ExplicitGenres;
+use App\Models\Genres;
 use Exception;
 use Statickidz\GoogleTranslate;
-use stdClass;
 
 class AnimeController extends BaseController
 {
@@ -84,7 +85,7 @@ class AnimeController extends BaseController
         echo '</pre>';
     }
 
-    public function getAll($type="tv", $filter="bypopularity", $rating="g", $page=1, $limit=24)
+    public function getApiJikan($type="tv", $filter="bypopularity", $rating="g", $page=1, $limit=24)
     {
         $functions = new FunctionController();
         $parameters = [
@@ -121,6 +122,10 @@ class AnimeController extends BaseController
 
                 if ($key == "episodes_counter"){
                     $animeModel->$key = $response->data->episodes;
+                }elseif($key == "external"){
+                    $animeModel->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }elseif($key == "streaming"){
+                    $animeModel->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
                 }else{
                     switch (gettype($response->data->$key)) {
                         case 'boolean':
@@ -154,17 +159,69 @@ class AnimeController extends BaseController
             $animeModel->save();
 
             if (isset($response->data->titles)) {
-
                 $titlesController = new TitlesController();
-                $titlesController->anime_id = $malId;
+                $titlesController->anime_id = $animeModel->id;
                 $titlesController->titles = $response->data->titles;
                 $titlesController->checkTitles();
-
             }
 
-            echo '<pre>';
+            if (isset($response->data->title_synonyms)) {
+                $titlesSynonymsController = new TitlesSynonymsController();
+                $titlesSynonymsController->anime_id = $animeModel->id;
+                $titlesSynonymsController->titles = $response->data->title_synonyms;
+                $titlesSynonymsController->checkTitlesSynonyms();
+            }
+
+            if (isset($response->data->producers)) {
+                $producersController = new ProducersController();
+                $producersController->anime_id = $animeModel->id;
+                $producersController->producers = $response->data->producers;
+                $producersController->checkProducers();
+            }
+
+            if (isset($response->data->licensors)) {
+                $licensorsController = new LicensorsController();
+                $licensorsController->anime_id = $animeModel->id;
+                $licensorsController->licensors = $response->data->licensors;
+                $licensorsController->checkLicensors();
+            }
+
+            if (isset($response->data->studios)) {
+                $studiosController = new StudiosController();
+                $studiosController->anime_id = $animeModel->id;
+                $studiosController->studios = $response->data->studios;
+                $studiosController->checkStudios();
+            }
+
+            if (isset($response->data->genres)) {
+                $genresController = new GenresController();
+                $genresController->anime_id = $animeModel->id;
+                $genresController->genres = $response->data->genres;
+                $genresController->checkGenres();
+            }
+
+            if (isset($response->data->explicit_genres)) {
+                $explicit_genresController = new ExplicitGenresController();
+                $explicit_genresController->anime_id = $animeModel->id;
+                $explicit_genresController->explicit_genres = $response->data->explicit_genres;
+                $explicit_genresController->checkExplicitGenres();
+            }
+
+            if (isset($response->data->themes)) {
+                $themesController = new ThemesController();
+                $themesController->anime_id = $animeModel->id;
+                $themesController->themes = $response->data->themes;
+                $themesController->checkThemes();
+            }
+
+            if (isset($response->data->demographics)) {
+                $demographicsController = new DemographicsController();
+                $demographicsController->anime_id = $animeModel->id;
+                $demographicsController->demographics = $response->data->demographics;
+                $demographicsController->checkDemographics();
+            }
+
             print_r($animeModel);
-            echo '</pre>';
 
         }
 
@@ -186,6 +243,10 @@ class AnimeController extends BaseController
 
                 if ($key == "episodes_counter"){
                     $stmt[$key] = $response->data->episodes;
+                }elseif($key == "external"){
+                    $animeModel->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }elseif($key == "streaming"){
+                    $animeModel->$key = json_encode($response->data->$key, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
                 }else{
                     $stmt[$key] = match (gettype($response->data->$key)) {
                         'boolean' => (int)$response->data->$key,
@@ -211,24 +272,69 @@ class AnimeController extends BaseController
             }
 
             $animeModel->where('mal_id', $malId)->update($stmt);
-            $anime = $animeModel->where('mal_id', $malId)->get();
+            $anime = $animeModel->where('mal_id', $malId)->first();
 
             if (isset($response->data->titles)) {
-
                 $titlesController = new TitlesController();
-                $titlesController->anime_id = $malId;
+                $titlesController->anime_id = $anime->id;
                 $titlesController->titles = $response->data->titles;
                 $titlesController->checkTitles();
-
             }
 
             if (isset($response->data->title_synonyms)) {
-
                 $titlesSynonymsController = new TitlesSynonymsController();
-                $titlesSynonymsController->anime_id = $malId;
+                $titlesSynonymsController->anime_id = $anime->id;
                 $titlesSynonymsController->titles = $response->data->title_synonyms;
                 $titlesSynonymsController->checkTitlesSynonyms();
+            }
 
+            if (isset($response->data->producers)) {
+                $producersController = new ProducersController();
+                $producersController->anime_id = $anime->id;
+                $producersController->producers = $response->data->producers;
+                $producersController->checkProducers();
+            }
+
+            if (isset($response->data->licensors)) {
+                $licensorsController = new LicensorsController();
+                $licensorsController->anime_id = $anime->id;
+                $licensorsController->licensors = $response->data->licensors;
+                $licensorsController->checkLicensors();
+            }
+
+            if (isset($response->data->studios)) {
+                $studiosController = new StudiosController();
+                $studiosController->anime_id = $anime->id;
+                $studiosController->studios = $response->data->studios;
+                $studiosController->checkStudios();
+            }
+
+            if (isset($response->data->genres)) {
+                $genresController = new GenresController();
+                $genresController->anime_id = $anime->id;
+                $genresController->genres = $response->data->genres;
+                $genresController->checkGenres();
+            }
+
+            if (isset($response->data->explicit_genres)) {
+                $explicit_genresController = new ExplicitGenresController();
+                $explicit_genresController->anime_id = $anime->id;
+                $explicit_genresController->explicit_genres = $response->data->explicit_genres;
+                $explicit_genresController->checkExplicitGenres();
+            }
+
+            if (isset($response->data->themes)) {
+                $themesController = new ThemesController();
+                $themesController->anime_id = $anime->id;
+                $themesController->themes = $response->data->themes;
+                $themesController->checkThemes();
+            }
+
+            if (isset($response->data->demographics)) {
+                $demographicsController = new DemographicsController();
+                $demographicsController->anime_id = $anime->id;
+                $demographicsController->demographics = $response->data->demographics;
+                $demographicsController->checkDemographics();
             }
 
             print_r($response->data);
@@ -236,7 +342,6 @@ class AnimeController extends BaseController
 
         } else {
             $functions->sendResponse(["message" => "Anime not founded"], 404);
-
         }
 
     }
@@ -245,7 +350,7 @@ class AnimeController extends BaseController
     {
         define('TITLE_PAGE', 'Animes');
         $this->query = "top/anime/";
-        $response_animes = $this->getAll();
+        $response_animes = $this->getApiJikan();
         $this->render('animes', ['response_animes' => $response_animes, 'filters' => false]);
     }
 }
