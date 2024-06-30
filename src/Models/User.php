@@ -33,13 +33,17 @@ class User extends Model {
     public $created;
     public $updated;
 
-    public function validate() {
+    /**
+     * @throws Exception
+     */
+    public function validate(): bool
+    {
 
         if(empty($this->token)){
             $this->token = Uuid::uuid4();
         }
 
-        Validator::validateUser($this);
+        return Validator::validateUser($this);
     }
 
     public function save() {
