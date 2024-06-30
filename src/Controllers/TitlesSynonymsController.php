@@ -2,9 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\Anime;
 use App\Models\TitlesSynonyms;
-use GuzzleHttp\Client;
 
 class TitlesSynonymsController extends BaseController
 {
@@ -20,26 +18,29 @@ class TitlesSynonymsController extends BaseController
 
     public function checkTitlesSynonyms()
     {
+        $titlesModel = new TitlesSynonyms();
         $functions = new FunctionController();
         $functions->api = true;
 
         foreach ($this->titles as $title) {
             if (!empty($title) && isset($this->anime_id)) {
 
-                $title_search = TitlesSynonyms::where('title', $title)
+                $title_search = $titlesModel
+                    ->where('title', $title)
                     ->where('anime_id', $this->anime_id)
                     ->first();
 
                 if (!$title_search) {
-                    $stmt = [];
-                    foreach (TitlesSynonyms::allowed_keys as $key) {
+                    foreach ($titlesModel->allowed_keys as $key) {
                         if ($key == "anime_id") {
-                            $stmt['anime_id'] = $this->anime_id;
+                            $titlesModel->anime_id = $this->anime_id;
                         }else{
-                            $stmt[$key] = $title;
+                            $titlesModel->$key = $title;
                         }
                     }
-                    TitlesSynonyms::create($stmt);
+                    if($titlesModel->validate()){
+                        $titlesModel->save();
+                    }
                 } else {
                     $title_search->update([
                         'title' => $title,

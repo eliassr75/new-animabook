@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Validators\Validator;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 #[\AllowDynamicProperties]
 class Titles extends Model
 {
 
-    const allowed_keys = [
+    public array $allowed_keys = [
         'title',
         'type',
         'anime_id'
@@ -32,7 +33,11 @@ class Titles extends Model
         return $this->belongsTo(Anime::class);
     }
 
-    public function validate() {
-        Validator::validateTitle($this);
+    /**
+     * @throws Exception
+     */
+    public function validate(): bool
+    {
+        return Validator::validateTitle($this);
     }
 }

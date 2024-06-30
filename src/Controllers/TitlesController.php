@@ -2,9 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\Anime;
 use App\Models\Titles;
-use GuzzleHttp\Client;
 
 class TitlesController extends BaseController
 {
@@ -31,15 +29,18 @@ class TitlesController extends BaseController
                     ->first();
 
                 if (!$title_search) {
-                    $stmt = [];
-                    foreach (Titles::allowed_keys as $key) {
+
+                    $titlesModel = new Titles();
+                    foreach ($titlesModel->allowed_keys as $key) {
                         if ($key == "anime_id") {
-                            $stmt['anime_id'] = $this->anime_id;
+                            $titlesModel->anime_id = $this->anime_id;
                         }else{
-                            $stmt[$key] = $title->$key;
+                            $titlesModel->$key = $title->$key;
                         }
                     }
-                    Titles::create($stmt);
+                    if($titlesModel->validate()){
+                        $titlesModel->save();
+                    }
                 } else {
                     $title_search->update([
                         'title' => $title->title,
