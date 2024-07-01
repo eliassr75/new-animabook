@@ -41,6 +41,8 @@ $router->addRoute('GET', '/animes/', AnimeController::class, 'showAllAnimes');
 $router->addRoute('GET', '/animes/all/', AnimeController::class, 'getAllAnimes');
 $router->addRoute('GET', '/anime/create/{malId}/', AnimeController::class, 'createAnime');
 $router->addRoute('GET', '/anime/update/{malId}/', AnimeController::class, 'updateAnime');
+$router->addRoute('GET', '/anime/characters/{malId}/', AnimeController::class, 'getCharacters');
+$router->addRoute('GET', '/anime/staff/{malId}/', AnimeController::class, 'getStaff');
 
 
 $router->handleRequest();

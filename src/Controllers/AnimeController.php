@@ -337,6 +337,14 @@ class AnimeController extends BaseController
                 $demographicsController->checkDemographics();
             }
 
+            //Process Characters
+            $characters = $this->getCharacters($malId);
+            if(is_array($characters) and !empty($characters)){
+
+
+
+            }
+
             print_r($response->data);
             print_r($anime);
 
@@ -344,6 +352,52 @@ class AnimeController extends BaseController
             $functions->sendResponse(["message" => "Anime not founded"], 404);
         }
 
+    }
+
+    public function getCharacters($malId)
+    {
+        $this->query = "anime/$malId/characters";
+        $functions = new FunctionController();
+        $functions->api = true;
+
+        try{
+            $response_anime = $this->getApiJikan();
+            if(isset($response_anime->data)){
+                echo "<pre>";
+                print_r($response_anime->data);
+                echo "</pre>";
+                return $response_anime->data;
+            }else{
+                $functions->sendResponse(["error" => "Characters for this Anime not founded"], 404);
+            }
+
+        }catch (Exception $e){
+            $functions->sendResponse(["error" => $e->getMessage()]);
+        }
+
+    }
+
+    public function getStaff($malId)
+    {
+        $this->query = "anime/$malId/staff";
+        $functions = new FunctionController();
+        $functions->api = true;
+
+        try{
+            $response_anime = $this->getApiJikan();
+            if(isset($response_anime->data)){
+                echo "<pre>";
+                print_r($response_anime->data);
+                echo "</pre>";
+                return $response_anime->data;
+            }else{
+                $functions->sendResponse(["message" => "Staff for this Anime not founded"], 404);
+            }
+
+
+        }catch (Exception $e){
+            return ["message" => $e->getMessage()];
+        }
     }
 
     public function showAllAnimes()

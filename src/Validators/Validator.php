@@ -2,11 +2,14 @@
 
 namespace App\Validators;
 
+use App\Models\Characters;
 use App\Models\Demographics;
 use App\Models\ExplicitGenres;
 use App\Models\Genres;
 use App\Models\Licensors;
+use App\Models\Positions;
 use App\Models\RelationLicensorAnime;
+use App\Models\Staff;
 use App\Models\Studios;
 use App\Models\Themes;
 use App\Models\User;
@@ -168,6 +171,50 @@ class Validator {
             throw new Exception("O MAL ID não pode ser nulo.");
         }
 
+        return true;
+    }
+
+    public static function validateCharacter(Characters $character): bool
+    {
+        if (empty($character->images)) {
+            throw new Exception("As imagens do personagem não podem ser nula.");
+        }
+        if (empty($character->name)) {
+            throw new Exception("O Nome do personagem não pode ser nulo.");
+        }
+        if (empty($character->url)) {
+            throw new Exception("A URL da personagem não pode ser nula.");
+        }
+        if (empty($character->mal_id)) {
+            throw new Exception("O MAL ID não pode ser nulo.");
+        }
+
+        return true;
+    }
+
+    public static function validateStaff(Staff $staff): bool
+    {
+        if (empty($staff->images)) {
+            throw new Exception("As imagens do ator não podem ser nula.");
+        }
+        if (empty($staff->name)) {
+            throw new Exception("O Nome do ator não pode ser nulo.");
+        }
+        if (empty($staff->url)) {
+            throw new Exception("A URL da ator não pode ser nula.");
+        }
+        if (empty($staff->mal_id)) {
+            throw new Exception("O MAL ID não pode ser nulo.");
+        }
+
+        return true;
+    }
+
+    public static function validatePositions(Positions $staff): bool
+    {
+        if (empty($staff->name)) {
+            throw new Exception("O Nome do cargo não pode ser nulo.");
+        }
         return true;
     }
 
